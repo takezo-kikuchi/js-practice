@@ -32,8 +32,6 @@ const myParseFloat = (str) => {
     return sign * num;
 }
 
-console.log(myParseFloat("123.45")); // 123.45
-
 const myEval = (formula) => {
     const operator = formula.match(/[^0-9.]/g);
     let result;
@@ -51,9 +49,10 @@ const myEval = (formula) => {
         // 0で割るとエラーになるので例外処理
         result = a/b
     }
-    else throw "Error"
     return result
 }
+
+
 document.getElementById("button2").addEventListener("click", function(event) {
     event.preventDefault();  // Prevents form submission
     let formula = document.getElementById("formula-input").value;
