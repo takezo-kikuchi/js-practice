@@ -15,6 +15,7 @@ document.getElementById("button2").addEventListener("click", function (event) {
 
 const iterateOperation = (input) => {
     let parsedInput = parseFormula(input);
+    console.log("数字と記号に分解しちゃうよ:", JSON.parse(JSON.stringify(parsedInput)));
     if (parsedInput.operators.length > 1){
     let step = decideOperationOrder(input);
     let safetyCounter = 0; // Safety counter to prevent infinite loops
@@ -34,16 +35,15 @@ const iterateOperation = (input) => {
         for (let i = 0; i < step.operators.length; i++) {
             formula += step.operators[i] + step.numbers[i + 1];
         }
-        console.log("Current formula:", formula);
+        console.log("今はこんな感じ：", formula);
         step = decideOperationOrder(formula);
     }
     if (step.operators.length == 1) {
         answer = myEval(step.numbers[0], step.numbers[1], step.operators[0]);
-        console.log("Current formula: ", step.numbers[0], step.operators[0], step.numbers[1]);
+        console.log("今はこんな感じ：", step.numbers[0], step.operators[0], step.numbers[1]);
     } else if (step.numbers.length == 1) {
         answer = step.numbers[0];
     } else { throw new Error("Invalid formula or insufficient operators!")};
-    console.log("Final Step:", JSON.parse(JSON.stringify(step)));
     return answer; // Return the final result as a string
 }
 else {
