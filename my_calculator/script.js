@@ -1,6 +1,7 @@
 'use strict';
 
 const myParseFloat = (str) => {
+    if (typeof str !== 'string') return NaN; 
     let index = 0;
     let sign = 1;
     let num = 0;
@@ -62,19 +63,24 @@ const decideOperationOrder = (formula) => {
           operators.push(tokens[i]);
         }
       }
-      firstOperator = operators[0];
-      secondOperator = operators[1];
+      let firstOperator = operators[0];
+      let secondOperator = operators[1];
       const operationOrder= ["*","/","+","-"]
+      let intermediate_result;
       if (operationOrder.indexOf(firstOperator) < operationOrder.indexOf(secondOperator)) {
-          return myEval(numbers[0],numbers[1],firstOperator)
+        intermediate_result = myEval(numbers[0],numbers[1],firstOperator)
+        numbers.splice(0, 2, intermediate_result);
+        operators.splice(0, 1);
       } else{
-        return myEval(numbers[1],numbers[2],secondOperator)
+        intermediate_result = myEval(numbers[1],numbers[2],secondOperator)
+        numbers.splice(1, 2, intermediate_result);
+        operators.splice(1, 1);
       }
-      // Returning an object containing numbers and operators
-  return {
-    numbers,
-    operators
-  };
+      return {
+        intermediate_result,
+        numbers,
+        operators
+      };
 }
 /*
 const decideOperationOrder = (numbers, operators) => {
@@ -84,16 +90,30 @@ const decideOperationOrder = (numbers, operators) => {
 }
 */
 
+const iterateOperation = (input) => {
+    let step = decideOperationOrder(input);
+   while (step.numbers.length > 1) {
+    // reconstruct the formula from numbers and operators
+    let formula = step.numbers[0].toString();
+    for (let i = 0; i < step.operators.length; i++) {
+        formula += step.operators[i] + step.numbers[i + 1];
+      }
+    step = decideOperationOrder(formula);
+    
+    }
+    console.log("Current Step:", JSON.parse(JSON.stringify(step)));
+    console.log("Numbers:", step.numbers.slice(), "Operators:", step.operators.slice());
+
+
+    return step.intermediate_result;
+}
     
 
 document.getElementById("button2").addEventListener("click", function(event) {
     event.preventDefault();  // Prevents form submission
-    let formula = document.getElementById("formula-input").value;
-    let process=splitFormula(formula);
-    console.log(process.numbers);
-    console.log(process.operators);
+    let input = document.getElementById("formula-input").value;
     try {
-        let result = myEval(formula);
+        let result = iterateOperation(input);
         document.getElementById("result").textContent = result;
     } catch (e) {
         console.log(e);
