@@ -1,5 +1,113 @@
 'use strict';
 
+document.getElementById("button2").addEventListener("click", function (event) {
+    event.preventDefault();  // Prevents form submission
+    let input = document.getElementById("formula-input").value;
+
+    try {
+        let result = iterateOperation(input);  // Use iterateOperation to get the result
+        document.getElementById("result").textContent = result;
+    } catch (e) {
+        console.log(e);
+        document.getElementById("result").textContent = "Error in formula!";
+    }
+});
+
+const iterateOperation = (input) => {
+    let parsedInput = parseFormula(input);
+    if (parsedInput.operators.length > 1){
+    let step = decideOperationOrder(input);
+    let safetyCounter = 0; // Safety counter to prevent infinite loops
+    let answer;
+    while (step.operators.length > 1) {
+        safetyCounter++;
+        if (safetyCounter > 100) { // Limit iterations to prevent infinite loops
+            throw new Error("Infinite loop detected! Please check the formula.");
+        }
+
+        // Reconstruct the formula from numbers and operators
+        if (step.operators.length !== step.numbers.length - 1) {
+            throw new Error("Mismatched numbers and operators!"); // Prevent undefined values
+        }
+
+        let formula = step.numbers[0];
+        for (let i = 0; i < step.operators.length; i++) {
+            formula += step.operators[i] + step.numbers[i + 1];
+        }
+        console.log("Current formula:", formula);
+        step = decideOperationOrder(formula);
+    }
+    if (step.operators.length == 1) {
+        answer = myEval(step.numbers[0], step.numbers[1], step.operators[0]);
+        console.log("Current formula: ", step.numbers[0], step.operators[0], step.numbers[1]);
+    } else if (step.numbers.length == 1) {
+        answer = step.numbers[0];
+    } else { throw new Error("Invalid formula or insufficient operators!")};
+    console.log("Final Step:", JSON.parse(JSON.stringify(step)));
+    return answer; // Return the final result as a string
+}
+else {
+    console.log(input);
+    return myEval(parsedInput.numbers[0], parsedInput.numbers[1], parsedInput.operators[0]);
+}}
+
+const decideOperationOrder = (formula) => {
+    let parsed = parseFormula(formula);
+    const operationOrder = ["*", "/", "+", "-"];
+    let firstOperator = parsed.operators[0];
+    let secondOperator = parsed.operators[1] || ""; // Handle case with only one operator
+    let intermediate_result;
+
+    if (operationOrder.indexOf(firstOperator) <= operationOrder.indexOf(secondOperator)) {
+        intermediate_result = myEval(parsed.numbers[0], parsed.numbers[1], firstOperator);
+        parsed.numbers.splice(0, 2, intermediate_result.toString());
+        parsed.operators.splice(0, 1);
+    } else {
+        intermediate_result = myEval(parsed.numbers[1], parsed.numbers[2], secondOperator);
+        parsed.numbers.splice(1, 2, intermediate_result.toString());
+        parsed.operators.splice(1, 1);
+    }
+    return {
+        intermediate_result,
+        numbers: parsed.numbers,
+        operators: parsed.operators
+    };
+}
+
+const parseFormula = (formula) => {
+    const tokens = formula.match(/(\d+\.?\d*|\+|\-|\*|\/|\(|\))/g);
+    const numbers = [];
+    const operators = [];
+    for (let i = 0; i < tokens.length; i++) {
+        if (/\d+/.test(tokens[i])) {
+            numbers.push(tokens[i]);
+        } else {
+            operators.push(tokens[i]);
+        }
+    }
+    return {
+        numbers,
+        operators
+    }
+}
+
+const myEval = (a, b, operator) => {
+    let result;
+    a = myParseFloat(a);
+    b = myParseFloat(b);
+    if (operator == "+") {
+        result = a + b;
+    } else if (operator == "-") {
+        result = a - b;
+    } else if (operator == "*") {
+        result = a * b;
+    } else if (operator == "/") {
+        if (b === 0) throw new Error("Division by zero!");
+        result = a / b;
+    }
+    return result;
+}
+
 const myParseFloat = (str) => {
     if (typeof str !== 'string') return NaN;
     let index = 0;
@@ -33,98 +141,14 @@ const myParseFloat = (str) => {
     return sign * num;
 }
 
-const myEval = (a, b, operator) => {
-    let result;
-    a = myParseFloat(a);
-    b = myParseFloat(b);
-    if (operator == "+") {
-        result = a + b;
-    } else if (operator == "-") {
-        result = a - b;
-    } else if (operator == "*") {
-        result = a * b;
-    } else if (operator == "/") {
-        if (b === 0) throw new Error("Division by zero!");
-        result = a / b;
-    }
-    return result;
-}
 
-const decideOperationOrder = (formula) => {
-    const tokens = formula.match(/(\d+\.?\d*|\+|\-|\*|\/|\(|\))/g);
-    const numbers = [];
-    const operators = [];
 
-    for (let i = 0; i < tokens.length; i++) {
-        if (/\d+/.test(tokens[i])) {
-            numbers.push(tokens[i]);
-        } else {
-            operators.push(tokens[i]);
-        }
-    }
 
-    if (numbers.length < 2 || operators.length === 0) {
-        throw new Error("Invalid formula or insufficient operators!");
-    }
 
-    const operationOrder = ["*", "/", "+", "-"];
-    let firstOperator = operators[0];
-    let secondOperator = operators[1] || ""; // Handle case with only one operator
 
-    let intermediate_result;
 
-    if (operationOrder.indexOf(firstOperator) < operationOrder.indexOf(secondOperator)) {
-        intermediate_result = myEval(numbers[0], numbers[1], firstOperator);
-        numbers.splice(0, 2, intermediate_result);
-        operators.splice(0, 1);
-    } else {
-        intermediate_result = myEval(numbers[1], numbers[2], secondOperator);
-        numbers.splice(1, 2, intermediate_result);
-        operators.splice(1, 1);
-    }
 
-    return {
-        intermediate_result,
-        numbers,
-        operators
-    };
-}
 
-const iterateOperation = (input) => {
-    let step = decideOperationOrder(input);
-    let safetyCounter = 0; // Safety counter to prevent infinite loops
-    while (step.numbers.length > 1) {
-        safetyCounter++;
-        if (safetyCounter > 100) { // Limit iterations to prevent infinite loops
-            throw new Error("Infinite loop detected! Please check the formula.");
-        }
+    
 
-        // Reconstruct the formula from numbers and operators
-        let formula = step.numbers[0];
-        for (let i = 0; i < step.operators.length; i++) {
-            formula += step.operators[i] + step.numbers[i + 1];
-        }
 
-        console.log("Current formula:", formula);
-        step = decideOperationOrder(formula);
-    }
-
-    console.log("Final Step:", JSON.parse(JSON.stringify(step)));
-    return step.numbers[0]; // Return the final result as a string
-}
-
-// Ensure the script runs after the DOM is loaded
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("button2").addEventListener("click", function (event) {
-        event.preventDefault();  // Prevents form submission
-        let input = document.getElementById("formula-input").value;
-
-        try {
-            let result = iterateOperation(input);  // Use iterateOperation to get the result
-            document.getElementById("result").textContent = result;
-        } catch (e) {
-            console.log(e);
-            document.getElementById("result").textContent = "Error in formula!";
-        }
-    });
-});
