@@ -15,15 +15,10 @@ document.getElementById("button2").addEventListener("click", function (event) {
 
 let isMinus = 0 || 1;
 const iterateOperation = (input) => {
-    let parsedInput = parseFormula(input);
-    console.log("数字と記号に分解する:", JSON.parse(JSON.stringify(parsedInput)));
-    if (parsedInput.operators.length == parsedInput.numbers.length && parsedInput.operators[0] == "-") {
-        parsedInput.numbers.splice(0, 1, -parsedInput.numbers[0]);
-        parsedInput.operators.splice(0, 1);
-        console.log("負の数登場:",JSON.parse(JSON.stringify(parsedInput)));
-    }
-    if (parsedInput.operators.length > 1){
-    let step = decideOperationOrder(input);
+    let step = parseFormula(input);
+    console.log("数字と記号に分解する:", JSON.parse(JSON.stringify(step)));
+    if (step.operators.length > 1){
+    let step = decideOperationOrder(input); //定義のためで特に意味はない
     let safetyCounter = 0; // Safety counter to prevent infinite loops
     let answer;
     while (step.numbers.length >= 3) {
@@ -38,6 +33,7 @@ const iterateOperation = (input) => {
         console.log("今はこんな感じ：", formula);
         console.log(JSON.parse(JSON.stringify(step)));
         step = decideOperationOrder(formula);
+        console.log("decideOperationOrderの後",JSON.parse(JSON.stringify(step)));
     }
     if (step.numbers.length == 2) {
         answer = myEval(step.numbers[0], step.numbers[1], step.operators[0]);
@@ -49,7 +45,7 @@ const iterateOperation = (input) => {
 }
 else { //いらないかも
     console.log(input); 
-    return myEval(parsedInput.numbers[0], parsedInput.numbers[1], parsedInput.operators[0]);
+    return myEval(step.numbers[0], step.numbers[1], step.operators[0]);
 }}
 
 const decideOperationOrder = (formula) => {
@@ -61,11 +57,11 @@ const decideOperationOrder = (formula) => {
 
     if (operationOrder.indexOf(firstOperator) <= operationOrder.indexOf(secondOperator)) {
         intermediate_result = myEval(parsed.numbers[0], parsed.numbers[1], firstOperator);
-        parsed.numbers.splice(0, 2, intermediate_result.toString());
+        parsed.numbers.splice(0, 2, intermediate_result);
         parsed.operators.splice(0, 1);
     } else {
         intermediate_result = myEval(parsed.numbers[1], parsed.numbers[2], secondOperator);
-        parsed.numbers.splice(1, 2, intermediate_result.toString());
+        parsed.numbers.splice(1, 2, intermediate_result);
         parsed.operators.splice(1, 1);
     }
     return {
@@ -81,10 +77,16 @@ const parseFormula = (formula) => {
     const operators = [];
     for (let i = 0; i < tokens.length; i++) {
         if (/\d+/.test(tokens[i])) {
-            numbers.push(tokens[i]);
-        } else {
+            numbers.push(myParseFloat(tokens[i]));
+        } else if (/[\+\-\*\/]/.test(tokens[i])) {
             operators.push(tokens[i]);
+        } else {
+            throw new Error("Invalid token found!");
         }
+    }
+    if (operators.length == numbers.length && operators[0] == "-"){
+        numbers.splice(0, 1, -numbers[0]);
+        operators.splice(0, 1);
     }
     return {
         numbers,
@@ -94,8 +96,6 @@ const parseFormula = (formula) => {
 
 const myEval = (a, b, operator) => {
     let result;
-    a = myParseFloat(a);
-    b = myParseFloat(b);
     if (operator == "+") {
         result = a + b;
     } else if (operator == "-") {
@@ -141,9 +141,6 @@ const myParseFloat = (str) => {
     if (decimalPlace > 0) num = num / decimalPlace;
     return sign * num;
 }
-
-
-
 
 
 
