@@ -15,7 +15,7 @@ document.getElementById("button2").addEventListener("click", function (event) {
 
 const iterateOperation = (input) => {
     let parsedInput = parseFormula(input);
-    console.log("数字と記号に分解しちゃいます:", JSON.parse(JSON.stringify(parsedInput)));
+    console.log("数字と記号に分解する:", JSON.parse(JSON.stringify(parsedInput)));
     if (parsedInput.operators.length > 1){
     let step = decideOperationOrder(input);
     let safetyCounter = 0; // Safety counter to prevent infinite loops
