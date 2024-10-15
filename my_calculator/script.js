@@ -13,9 +13,15 @@ document.getElementById("button2").addEventListener("click", function (event) {
     }
 });
 
+let isMinus = 0 || 1;
 const iterateOperation = (input) => {
     let parsedInput = parseFormula(input);
     console.log("数字と記号に分解する:", JSON.parse(JSON.stringify(parsedInput)));
+    if (parsedInput.operators.length == parsedInput.numbers.length && parsedInput.operators[0] == "-") {
+        parsedInput.numbers.splice(0, 1, -parsedInput.numbers[0]);
+        parsedInput.operators.splice(0, 1);
+        console.log("負の数登場:",JSON.parse(JSON.stringify(parsedInput)));
+    }
     if (parsedInput.operators.length > 1){
     let step = decideOperationOrder(input);
     let safetyCounter = 0; // Safety counter to prevent infinite loops
@@ -30,6 +36,7 @@ const iterateOperation = (input) => {
             formula += step.operators[i] + step.numbers[i + 1];
         }
         console.log("今はこんな感じ：", formula);
+        console.log(JSON.parse(JSON.stringify(step)));
         step = decideOperationOrder(formula);
     }
     if (step.numbers.length == 2) {
@@ -40,8 +47,8 @@ const iterateOperation = (input) => {
     } else { throw new Error("Invalid formula or insufficient operators!")};
     return answer; // Return the final result as a string
 }
-else {
-    console.log(input);
+else { //いらないかも
+    console.log(input); 
     return myEval(parsedInput.numbers[0], parsedInput.numbers[1], parsedInput.operators[0]);
 }}
 
