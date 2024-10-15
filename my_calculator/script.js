@@ -18,7 +18,7 @@ const iterateOperation = (input) => {
     let step = parseFormula(input);
     console.log("数字と記号に分解する:", JSON.parse(JSON.stringify(step)));
     if (step.operators.length > 1){
-    let step = decideOperationOrder(input); //定義のためで特に意味はない
+    let step = decideOperationOrder(input); //定義のためにここで三つ以上の数の演算はここで一回実行
     let safetyCounter = 0; // Safety counter to prevent infinite loops
     let answer;
     while (step.numbers.length >= 3) {
