@@ -35,7 +35,7 @@ const iterateOperation = (input) => {
         step = decideOperationOrder(formula);
         console.log("decideOperationOrderの後",JSON.parse(JSON.stringify(step)));
     }
-    if (step.numbers.length == 2) {
+    if (step.numbers.length == 2) { // decideOperationOrderのsecondOperatorが定義できない場合
         answer = myEval(step.numbers[0], step.numbers[1], step.operators[0]);
         console.log("今はこんな感じ：", step.numbers[0], step.operators[0], step.numbers[1]);
     } else if (step.numbers.length == 1) {
@@ -84,7 +84,7 @@ const parseFormula = (formula) => {
             throw new Error("Invalid token found!");
         }
     }
-    if (operators.length == numbers.length && operators[0] == "-"){
+    if (operators.length == numbers.length && operators[0] == "-"){ //式の最初がマイナスの場合
         numbers.splice(0, 1, -numbers[0]);
         operators.splice(0, 1);
     }
