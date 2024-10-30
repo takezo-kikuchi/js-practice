@@ -13,6 +13,26 @@ document.getElementById("button2").addEventListener("click", function (event) {
     }
 });
 
+const divideParentheses = (formula) => {
+    const formulaArray = [];
+    for (let i = 0; i < tokens.length; i++){
+       if (/(\d+\.?\d*|\+|\-|\*|\/|\(|\))/.test(tokens[i])) {
+    formulaArray.push(tokens[i]);}
+    }
+    const startParenthesesIndices = formulaArray
+    .map((element, index) => (element === '(') ? index : -1)
+    .filter(index => index !== -1);
+
+    const endParenthesesIndices = formulaArray
+    .map((element, index) => (element === ')') ? index : -1)
+    .filter(index => index !== -1);
+    
+    for (let i = startParenthesesIndices+1; i < endParenthesesIndices ; i++) {
+        formula += formulaArray[i];
+    }
+    return {}
+    }
+
 let isMinus = 0 || 1;
 const iterateOperation = (input) => {
     let step = parseFormula(input);
@@ -75,14 +95,16 @@ const parseFormula = (formula) => {
     const tokens = formula.match(/(\d+\.?\d*|\+|\-|\*|\/|\(|\))/g);
     const numbers = [];
     const operators = [];
+
     for (let i = 0; i < tokens.length; i++) {
         if (/\d+/.test(tokens[i])) {
             numbers.push(myParseFloat(tokens[i]));
         } else if (/[\+\-\*\/]/.test(tokens[i])) {
             operators.push(tokens[i]);
-        } else {
-            throw new Error("Invalid token found!");
         }
+        // else {
+        //     throw new Error("Invalid token found!");
+        // }
     }
     if (operators.length == numbers.length && operators[0] == "-"){ //式の最初がマイナスの場合
         numbers.splice(0, 1, -numbers[0]);
@@ -90,7 +112,10 @@ const parseFormula = (formula) => {
     }
     return {
         numbers,
-        operators
+        operators,
+        formulaArray,
+        startParenthesesIndices,
+        endParenthesesIndices
     }
 }
 
