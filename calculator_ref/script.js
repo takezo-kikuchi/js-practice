@@ -31,17 +31,20 @@ const evaluateExpression = (formula) => {
 
 // Function to resolve parentheses by recursively evaluating inner expressions
 const resolveParentheses = (formula) => {
+    console.log("LET'S START")
     while (/\(([^()]+)\)/.test(formula)) {
+        console.log(formula);
         formula = formula.replace(/\(([^()]+)\)/, (match, subExpression) => {
             return evaluateSimpleExpression(subExpression).toString();
         });
     }
+    console.log("Finally: ", formula);
     return formula;
 };
 
 // Function to evaluate simple expressions without parentheses (order of operations)
 const evaluateSimpleExpression = (expression) => {
-    const tokens = expression.match(/(\d+\.?\d*|\+|\-|\*|\/)/g);
+    const tokens = expression.match(/-?\d+\.?\d*|[\+\-\*\/\(\)]/g);
     if (!tokens) {
         throw new Error("Invalid expression");
     }
@@ -90,12 +93,13 @@ const simpleOperation = (a, b, operator) => {
     throw new Error(`Invalid operator: ${operator}`);
 };
 
-// Test cases to verify the implementation
+// Test cases to verify the implementation using Map
 const snapshots = new Map([
     ["1+2", 3],
     ["2*3", 6],
     ["(1+2)*3", 9],
     ["(1+2)*3+4", 13],
+    ["(1+2)*(3+4)", 21],
 ]);
 
 let hasError = false;
@@ -103,6 +107,32 @@ for (const [input, expected] of snapshots) {
     const result = evaluateExpression(input);
     if (result !== expected) {
         console.error(`Input: ${input}, Expected: ${expected}, Result: ${result}`);
+        hasError = true;
+    }
+}
+
+if (!hasError) {
+    console.log("All test cases passed!");
+}
+
+let formulaSamples = [
+    "(3+5)*2",
+    "(8*4)/(2+6)",
+    "((12+8)*3)-(9/3)",
+    "((50-30)/10)+7",
+    "(5+3)*(12-4)/2",
+    "(100/(25+5))*(10-8)",
+    "((15-5)*(8/4))+10",
+    "(7.5*(10+5))/3",
+    "((8-10)*(6/3))+5",
+    "((20+30)/(5*2))-(18-(9/3))"
+  ];
+
+for (const formula of formulaSamples) {
+    const result = evaluateExpression(formula);
+    const expected = eval(formula) 
+    if (result !== expected) {
+        console.error(`Input: ${formula}, Expected: ${expected}, Result: ${result}`);
         hasError = true;
     }
 }
